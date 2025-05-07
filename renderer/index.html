@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Epochr</title>
+  <link rel="icon" type="image/png" href="../appIcon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="drag-region"></div>
+  <div id="window-controls">
+    <button class="window-btn" id="min-btn" title="Minimize"></button>
+    <button class="window-btn" id="max-btn" title="Maximize"></button>
+    <button class="window-btn" id="close-btn" title="Close"></button>
+  </div>
+  <div id="logo-board-container">
+    <img src="../logo.png" alt="Logo" id="board-logo">
+  </div>
+  <div id="board-container">
+    <div class="kanban-section" id="tasks-section">
+      <h2>Tasks</h2>
+      <div class="task-list-scroll"><div class="task-list" id="tasks-list"></div></div>
+    </div>
+    <div class="kanban-section" id="doing-section">
+      <h2>Doing</h2>
+      <div class="task-list-scroll"><div class="task-list" id="doing-list"></div></div>
+    </div>
+    <div class="kanban-section" id="done-section">
+      <h2>Done</h2>
+      <div class="task-list-scroll"><div class="task-list" id="done-list"></div></div>
+    </div>
+  </div>
+  <button id="add-task-btn" title="Add Task">+</button>
+  <button id="manage-tags-btn" style="display:none"></button>
+  <div id="custom-context-menu" class="custom-context-menu">
+    <button class="context-item" data-action="new">New Board</button>
+    <button class="context-item" data-action="load">Load Board</button>
+    <button class="context-item" data-action="save">Save Board</button>
+    <div class="context-separator"></div>
+    <button class="context-item" data-action="tags">Manage Tags</button>
+    <button class="context-item" data-action="filter">Filter Tasks</button>
+  </div>
+  <div id="task-modal" class="modal">
+    <div class="modal-content minimal-modal">
+      <span class="close" id="close-modal">&times;</span>
+      <h2 id="modal-title" class="modal-title">Add Task</h2>
+      <form id="task-form" class="modal-form">
+        <input type="hidden" id="task-id">
+        <div class="modal-field">
+          <label for="task-title">Title</label>
+          <input type="text" id="task-title" required autocomplete="off">
+        </div>
+        <div class="modal-field">
+          <label for="task-desc">Description</label>
+          <textarea id="task-desc" rows="2" autocomplete="off"></textarea>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label for="task-priority">Priority</label>
+            <select id="task-priority">
+              <option value="normal">Normal</option>
+              <option value="low">Low</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label for="task-section">Section</label>
+            <select id="task-section">
+              <option value="tasks">Tasks</option>
+              <option value="doing">Doing</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label>Tags</label>
+          <div id="task-tags-btns" class="filter-btn-group"></div>
+          <input type="text" id="new-tag-input" placeholder="Add new tag and press Enter">
+        </div>
+        <div class="modal-actions">
+          <button type="submit" id="save-task-btn" class="modal-btn primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="tags-modal" class="modal">
+    <div class="modal-content minimal-modal">
+      <span class="close" id="close-tags-modal">&times;</span>
+      <h2 class="modal-title">Manage Tags</h2>
+      <ul id="tags-list" class="tags-list"></ul>
+      <form id="add-tag-form" class="modal-form modal-row">
+        <input type="text" id="new-tag-name" placeholder="Tag name" required autocomplete="off">
+        <input type="color" id="new-tag-color" value="#b2bec3">
+        <button type="submit" class="modal-btn primary">Add</button>
+      </form>
+    </div>
+  </div>
+  <div id="filter-modal" class="modal">
+    <div class="modal-content minimal-modal">
+      <span class="close" id="close-filter-modal">&times;</span>
+      <h2 class="modal-title">Filter Tasks</h2>
+      <form id="filter-form" class="modal-form">
+        <div class="modal-field">
+          <label>Priority</label>
+          <div id="filter-priority-btns" class="filter-btn-group"></div>
+        </div>
+        <div class="modal-field">
+          <label>Tags</label>
+          <div id="filter-tags-btns" class="filter-btn-group"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="modal-btn primary">Apply Filter</button>
+          <button type="button" id="clear-filter-btn" class="modal-btn" style="margin-left:10px;">Clear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

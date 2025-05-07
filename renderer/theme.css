@@ -1,0 +1,97 @@
+:root {
+  /* Backgrounds */
+  --background-color: #f9f5ef;
+  --logo-color: #e2d9cb;
+  --section-bg: #FAF1E6;
+  --section-border: #666666;
+  --modal-bg: #fff;
+  --modal-border: #666666;
+
+  /* Logo */
+  --logo-width: 160px;
+  --logo-height: 160px;
+  --logo-margin-top: 16px;
+  --logo-margin-bottom: 1px;
+  --logo-opacity: 1;
+  --logo-radius: 12px;
+  --logo-shadow: none;
+
+  /* Section */
+  --section-radius: 4px;
+  --section-min-width: 320px;
+  --section-max-width: 340px;
+  --section-padding: 0 0 18px 0;
+  --section-gap: 48px;
+  --section-title-font: 'Cascadia Mono', 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+  --section-title-size: 16px;
+  --section-title-weight: 700;
+  --section-title-color: #2d2d2d;
+  --section-border-weight: 1px;
+  --section-height-transition: height 0.25s cubic-bezier(.4,1.3,.6,1);
+  --section-placeholder-transition: margin 0.25s cubic-bezier(.4,1.3,.6,1), height 0.25s cubic-bezier(.4,1.3,.6,1);
+
+  /* Task Card */
+  --task-bg: #FDFAF6;
+  --task-border: #666666;
+  --task-radius: 4px;
+  --task-padding: 12px 14px 10px 14px;
+  --task-gap: 8px;
+  --task-title-font: 'Cascadia Mono', 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+  --task-title-size: 14px;
+  --task-title-weight: 500;
+  --task-title-color: #2d2d2d;
+  --task-title-weight: bold;
+  --task-title-size: 14px;
+  --task-desc-color: #6d5c4d;
+  --task-desc-size: 11px;
+  --task-hover-translateY: -2px;
+  --task-hover-scale: 1;
+  --task-hover-transition: 0.18s cubic-bezier(.4,1.3,.6,1);
+  --task-border-weight: 1px;
+
+  /* Tag */
+  --tag-radius: 12px;
+  --tag-padding: 2px 12px;
+  --tag-font-size: 11px;
+  --tag-font-weight: 400;
+  --tag-bg: #b2bec3;
+  --tag-color: #fff;
+  --tag-gap: 6px;
+  --tag-margin: 0;
+  --tag-font: 'Cascadia Mono', 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+
+  /* Priority Pills */
+  --priority-normal: #3498db;
+  --priority-low: #27ae60;
+  --priority-high: #e74c3c;
+
+  /* Fonts */
+  --font-family: 'Cascadia Mono', 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+  --font-color: #2d2d2d;
+
+  /* Floating Button */
+  --add-btn-bg: #111;
+  --add-btn-bg-hover: #333;
+  --add-btn-color: #fff;
+  --add-btn-radius: 50%;
+  --add-btn-size: 54px;
+  --add-btn-font-size: 2.2em;
+  --add-btn-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  --add-btn-hover-scale: 1.1;
+
+  /* Modal */
+  --modal-radius: 8px;
+  --modal-shadow: none;
+  --modal-close-color: #aaa;
+  --modal-close-hover: #e74c3c;
+
+  /* Drag Floating */
+  --drag-floating-opacity: 1;
+  --drag-floating-rotate: 2deg;
+  --drag-floating-scale: 1.1;
+
+  /* Cursors */
+  --cursor-normal: url('../cursor-normal.png') 0 0, auto;
+  --cursor-hover: url('../cursor-hover.png') 0 0, pointer;
+  --cursor-drag: url('../cursor-drag.png') 0 0, grab;
+}
