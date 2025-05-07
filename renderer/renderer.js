@@ -438,6 +438,53 @@ function onDragEnd(e) {
   if (!dropped) renderBoard();
 }
 
+function showTaskContextMenu(taskId, x, y) {
+  const menu = document.getElementById('custom-context-menu');
+  menu.innerHTML = '';
+  // Delete Task option
+  const delBtn = document.createElement('div');
+  delBtn.className = 'context-item';
+  delBtn.textContent = 'Delete Task';
+  delBtn.onclick = function() {
+    const idx = boardData.tasks.findIndex(t => t.id === taskId);
+    if (idx !== -1) {
+      boardData.tasks.splice(idx, 1);
+      renderBoard();
+      autosaveBoard();
+    }
+    menu.style.display = 'none';
+  };
+  menu.appendChild(delBtn);
+  // Apply filter with this task's tags option
+  const filterBtn = document.createElement('div');
+  filterBtn.className = 'context-item';
+  filterBtn.textContent = "Apply filter with this task's tags";
+  filterBtn.onclick = function() {
+    const task = boardData.tasks.find(t => t.id === taskId);
+    if (task && task.tags && task.tags.length) {
+      filterState.tags = [...task.tags];
+      filterState.priorities = [];
+      renderBoard();
+    }
+    menu.style.display = 'none';
+  };
+  menu.appendChild(filterBtn);
+  // Show at position
+  menu.style.left = `${x}px`;
+  menu.style.top = `${y}px`;
+  menu.style.display = 'block';
+  // Hide on click elsewhere
+  setTimeout(() => {
+    const hide = (e) => {
+      if (!menu.contains(e.target)) {
+        menu.style.display = 'none';
+        document.removeEventListener('mousedown', hide);
+      }
+    };
+    document.addEventListener('mousedown', hide);
+  }, 0);
+}
+
 function renderBoard() {
   // Backup all tasks for Sortable reference
   window._allTasksBackup = boardData.tasks.slice();
@@ -459,6 +506,10 @@ function renderBoard() {
     card.setAttribute('data-priority', task.priority || 'normal');
     card.setAttribute('data-task-id', task.id);
     card.onclick = () => onTaskCardClick(task.id);
+    card.oncontextmenu = (e) => {
+      e.preventDefault();
+      showTaskContextMenu(task.id, e.clientX, e.clientY);
+    };
     // Priority pill
     if (task.priority) {
       const prio = document.createElement('span');
@@ -503,7 +554,51 @@ function renderBoard() {
 // Context menu logic
 const contextMenu = document.getElementById('custom-context-menu');
 
-function showContextMenu(x, y) {
+function showBoardContextMenu(x, y) {
+  contextMenu.innerHTML = '';
+  // New Board
+  const newBtn = document.createElement('div');
+  newBtn.className = 'context-item';
+  newBtn.textContent = 'New Board';
+  newBtn.setAttribute('data-action', 'new');
+  contextMenu.appendChild(newBtn);
+  // Load Board
+  const loadBtn = document.createElement('div');
+  loadBtn.className = 'context-item';
+  loadBtn.textContent = 'Load Board';
+  loadBtn.setAttribute('data-action', 'load');
+  contextMenu.appendChild(loadBtn);
+  // Save Board
+  const saveBtn = document.createElement('div');
+  saveBtn.className = 'context-item';
+  saveBtn.textContent = 'Save Board';
+  saveBtn.setAttribute('data-action', 'save');
+  contextMenu.appendChild(saveBtn);
+
+
+  const spct = document.createElement('div');
+  spct.className = 'context-separator';
+  spct.textContent = '';
+  spct.setAttribute('data-action', 'none');
+  contextMenu.appendChild(spct);
+
+
+
+
+
+  // Manage Tags
+  const tagsBtn = document.createElement('div');
+  tagsBtn.className = 'context-item';
+  tagsBtn.textContent = 'Manage Tags';
+  tagsBtn.setAttribute('data-action', 'tags');
+  contextMenu.appendChild(tagsBtn);
+  // Filter
+  const filterBtn = document.createElement('div');
+  filterBtn.className = 'context-item';
+  filterBtn.textContent = 'Filter';
+  filterBtn.setAttribute('data-action', 'filter');
+  contextMenu.appendChild(filterBtn);
+  // Show at position
   contextMenu.style.display = 'block';
   contextMenu.style.left = x + 'px';
   contextMenu.style.top = y + 'px';
@@ -513,8 +608,10 @@ function hideContextMenu() {
 }
 
 document.addEventListener('contextmenu', function(e) {
+  // If right-clicking a task card, let the card's oncontextmenu handle it
+  if (e.target.closest('.task-card')) return;
   e.preventDefault();
-  showContextMenu(e.clientX, e.clientY);
+  showBoardContextMenu(e.clientX, e.clientY);
 });
 document.addEventListener('click', function(e) {
   if (!contextMenu.contains(e.target)) hideContextMenu();

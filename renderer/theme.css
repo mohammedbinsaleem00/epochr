@@ -94,4 +94,17 @@
   --cursor-normal: url('../cursor-normal.png') 0 0, auto;
   --cursor-hover: url('../cursor-hover.png') 0 0, pointer;
   --cursor-drag: url('../cursor-drag.png') 0 0, grab;
+
+  /* Window Minimum Size */
+  --window-min-width: 1200px;
+  --window-min-height: 700px;
+}
+
+/* Hide scrollbars for the entire window */
+body, html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+body::-webkit-scrollbar, html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }

@@ -535,6 +535,7 @@ body {
   font-family: var(--font-family);
   color: var(--font-color);
   transition: opacity 0.15s;
+  overflow: hidden;
 }
 .custom-context-menu .context-item {
   display: block;
@@ -548,10 +549,12 @@ body {
   padding: 10px 22px;
   cursor: pointer;
   transition: background 0.13s, color 0.13s;
+  overflow: hidden;
 }
 .custom-context-menu .context-item:hover, .custom-context-menu .context-item:focus {
   background: #f3efe7;
   color: #222;
+  width: 100%;
 }
 .custom-context-menu .context-separator {
   height: 1px;

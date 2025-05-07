@@ -19,15 +19,38 @@ function getLastOpenedFile() {
   return null;
 }
 
+function parseCssVarPx(value, fallback) {
+  if (!value) return fallback;
+  const match = value.match(/([0-9.]+)px/);
+  return match ? parseInt(match[1], 10) : fallback;
+}
+
+function getWindowMinSizeFromTheme() {
+  try {
+    const themePath = path.join(__dirname, 'renderer', 'theme.css');
+    const css = fs.readFileSync(themePath, 'utf-8');
+    const minWidthMatch = css.match(/--window-min-width:\s*([0-9.]+px)/);
+    const minHeightMatch = css.match(/--window-min-height:\s*([0-9.]+px)/);
+    const minWidth = parseCssVarPx(minWidthMatch && minWidthMatch[1], 600);
+    const minHeight = parseCssVarPx(minHeightMatch && minHeightMatch[1], 400);
+    return { minWidth, minHeight };
+  } catch {
+    return { minWidth: 600, minHeight: 400 };
+  }
+}
+
 function setContextMenu(win) {
   // Restore native context menu (remove custom logic)
   // No custom context menu event
 }
 
 function createWindow() {
+  const { minWidth, minHeight } = getWindowMinSizeFromTheme();
   const win = new BrowserWindow({
-    width: 1000,
+    width: 1200,
     height: 700,
+    minWidth,
+    minHeight,
     frame: false, // Remove the default title bar
     icon: path.join(__dirname, 'appIcon.png'), // Set app icon
     title: 'Epochr', // Set window title
