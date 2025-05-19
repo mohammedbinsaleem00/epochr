@@ -561,6 +561,41 @@ body {
   opacity: 0.5;
 }
 
+/* Fix for linked board field button group in modal */
+#task-modal .modal-field > div[style*='display:flex'] {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#linked-board-path {
+  min-width: 0;
+  flex: 1 1 120px;
+}
+#select-linked-board-btn, #clear-linked-board-btn {
+  flex: 0 0 auto;
+  max-width: 90px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Linked board field: place buttons below the path field in the modal */
+#task-modal .modal-field .linked-board-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+#linked-board-path {
+  min-width: 0;
+  width: 100%;
+  margin-bottom: 0;
+}
+#select-linked-board-btn, #clear-linked-board-btn {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
 /* Responsive Design */
 @media (max-width: 900px) {
   #board-container {

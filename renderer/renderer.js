@@ -110,6 +110,7 @@ function openTaskModal(editTask = null) {
   renderTaskTagsButtons(editTask ? (editTask.tags || []) : []);
   document.getElementById('new-tag-input').value = '';
   document.getElementById('task-section').value = editTask ? (editTask.section || 'tasks') : 'tasks';
+  updateLinkedBoardField(editTask ? editTask.linkedBoard : '');
   // Ensure the modal is interactive and focus the first input
   setTimeout(() => {
     document.getElementById('task-title').focus();
@@ -134,8 +135,10 @@ document.getElementById('task-form').onsubmit = function(e) {
   const priority = document.getElementById('task-priority').value;
   const tags = getSelectedTaskTags();
   const section = document.getElementById('task-section').value;
+  const linkedBoard = currentLinkedBoardPath || '';
   const existingIdx = boardData.tasks.findIndex(t => t.id === id);
   const task = { id, title, desc, priority, tags, section };
+  if (linkedBoard) task.linkedBoard = linkedBoard;
   if (existingIdx >= 0) {
     boardData.tasks[existingIdx] = task;
   } else {
@@ -318,7 +321,10 @@ function enableCustomDrag() {
     let dragStarted = false;
     let startX = 0, startY = 0;
     let mouseMoveHandler, mouseUpHandler;
+    let mouseDownTarget = null; // Track where mousedown started
+
     card.onmousedown = function(e) {
+      mouseDownTarget = e.target; // Track the original target
       if (e.button !== 0) return; // Only left mouse
       dragStarted = false;
       startX = e.clientX;
@@ -363,7 +369,38 @@ function enableCustomDrag() {
         window.removeEventListener('mousemove', mouseMoveHandler);
         window.removeEventListener('mouseup', mouseUpHandler);
         if (!dragStarted) {
-          // Treat as click
+          // If click was on jump area, jump directly
+          if (mouseDownTarget && mouseDownTarget.closest('.linked-board-jump-area')) {
+            // Find the jump area element and get the linked board path
+            const jumpArea = mouseDownTarget.closest('.linked-board-jump-area');
+            // Find the parent card and get the task id
+            const cardElem = jumpArea.closest('.task-card');
+            if (cardElem) {
+              const taskId = cardElem.getAttribute('data-task-id');
+              const task = boardData.tasks.find(t => t.id === taskId);
+              if (task && task.linkedBoard) {
+                // Normalize path for Windows
+                let boardPath = task.linkedBoard;
+                if (typeof boardPath === 'string') {
+                  boardPath = boardPath.replace(/\\/g, '/');
+                }
+                // Check if file exists before jumping
+                try {
+                  const fs = require('fs');
+                  if (fs.existsSync(boardPath)) {
+                    jumpToLinkedBoard(boardPath);
+                  } else {
+                    alert('Linked board file not found: ' + boardPath);
+                  }
+                } catch (err) {
+                  alert('Error accessing linked board: ' + err.message);
+                }
+              } else {
+                alert('No linked board path found for this task.');
+              }
+            }
+            return;
+          }
           const taskId = card.getAttribute('data-task-id');
           onTaskCardClick(taskId);
         } else {
@@ -464,7 +501,22 @@ function renderBoard() {
     card.className = 'task-card';
     card.setAttribute('data-priority', task.priority || 'normal');
     card.setAttribute('data-task-id', task.id);
-    card.onclick = () => onTaskCardClick(task.id);
+    // Right arrow for linked board
+    if (task.linkedBoard) {
+      const jumpArea = document.createElement('div');
+      jumpArea.className = 'linked-board-jump-area';
+      jumpArea.title = 'Jump to linked board';
+      jumpArea.style.cssText = `position:absolute;top:0;right:0;height:100%;width:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;background:none;`;
+      jumpArea.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" style="display:block;" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4l5 5-5 5" stroke="#6d5c4d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      jumpArea.addEventListener('click', function(e) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        jumpToLinkedBoard(task.linkedBoard);
+        return false;
+      });
+      card.appendChild(jumpArea);
+      card.style.position = 'relative';
+    }
     // Priority pill
     if (task.priority) {
       const prio = document.createElement('span');
@@ -502,6 +554,13 @@ function renderBoard() {
     }
     const sectionList = document.getElementById((task.section || 'tasks') + '-list');
     if (sectionList) sectionList.appendChild(card);
+    card.addEventListener('click', function(e) {
+      if (e && e.target && e.target.closest('.linked-board-jump-area')) {
+        // Let the jumpArea handler handle it
+        return;
+      }
+      onTaskCardClick(task.id);
+    });
   });
   enableCustomDrag();
 }
@@ -637,3 +696,117 @@ function setStatusBarVisible(visible) {
 function getStatusBarVisible() {
   return localStorage.getItem('statusBarVisible') !== '0';
 }
+
+// --- Linked Board field logic for task modal ---
+let currentLinkedBoardPath = '';
+
+function updateLinkedBoardField(path) {
+  const input = document.getElementById('linked-board-path');
+  const clearBtn = document.getElementById('clear-linked-board-btn');
+  currentLinkedBoardPath = path || '';
+  input.value = path || '';
+  clearBtn.style.display = path ? '' : 'none';
+}
+
+document.getElementById('select-linked-board-btn').onclick = function() {
+  ipcRenderer.invoke('dialog:openBoard').then(result => {
+    if (result && result.filePath) {
+      updateLinkedBoardField(result.filePath);
+    }
+  });
+};
+document.getElementById('clear-linked-board-btn').onclick = function() {
+  updateLinkedBoardField('');
+};
+
+// Update openTaskModal to set linked board field
+function openTaskModal(editTask = null) {
+  document.getElementById('task-modal').style.display = 'block';
+  document.getElementById('modal-title').textContent = editTask ? 'Edit Task' : 'Add Task';
+  document.getElementById('task-id').value = editTask ? editTask.id : '';
+  document.getElementById('task-title').value = editTask ? editTask.title : '';
+  document.getElementById('task-desc').value = editTask ? (editTask.desc || '') : '';
+  document.getElementById('task-priority').value = editTask ? editTask.priority : 'normal';
+  renderTaskTagsButtons(editTask ? (editTask.tags || []) : []);
+  document.getElementById('new-tag-input').value = '';
+  document.getElementById('task-section').value = editTask ? (editTask.section || 'tasks') : 'tasks';
+  updateLinkedBoardField(editTask ? editTask.linkedBoard : '');
+  // Ensure the modal is interactive and focus the first input
+  setTimeout(() => {
+    document.getElementById('task-title').focus();
+  }, 0);
+}
+
+// --- Linked Board Navigation ---
+function jumpToLinkedBoard(path) {
+  if (!path) return;
+  if (!window.boardNavStack) window.boardNavStack = [];
+  if (window.currentFilePath) window.boardNavStack.push(window.currentFilePath);
+  jumpToBoardFile(path);
+  showBackButton(window.boardNavStack.length > 0);
+}
+
+function jumpToBoardFile(path) {
+  const fs = require('fs');
+  try {
+    const data = fs.readFileSync(path, 'utf-8');
+    window.currentFilePath = path;
+    ipcRenderer.send('set-current-file', path);
+    updateCurrentBoardPath(path);
+    loadBoardFromData(data);
+    // Optionally: showBackButton(boardNavStack && boardNavStack.length > 0);
+  } catch (e) {
+    alert('Failed to load linked board: ' + e.message);
+  }
+}
+
+// Add a back button to the top left corner
+const backButton = document.createElement('button');
+backButton.id = 'back-board-btn';
+backButton.title = 'Back to previous board';
+backButton.style.cssText = `
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  z-index: 200001;
+  background: #f3efe7;
+  border: 1.5px solid #e2d9cb;
+  border-radius: 7px;
+  padding: 6px 14px 6px 10px;
+  font-family: inherit;
+  font-size: 1em;
+  color: #6d5c4d;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  cursor: pointer;
+  transition: background 0.18s cubic-bezier(.4,1.3,.6,1), box-shadow 0.18s cubic-bezier(.4,1.3,.6,1);
+`;
+backButton.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;" xmlns="http://www.w3.org/2000/svg"><path d="M10.5 13L5.5 8L10.5 3" stroke="#6d5c4d" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg> <span style="font-size:0.98em; color:#6d5c4d;">Back</span>`;
+document.body.appendChild(backButton);
+
+// Board navigation stack
+window.boardNavStack = [];
+
+function showBackButton(show) {
+  backButton.style.display = show ? 'flex' : 'none';
+}
+
+backButton.onclick = function() {
+  if (window.boardNavStack && window.boardNavStack.length > 0) {
+    const prevPath = window.boardNavStack.pop();
+    if (prevPath) {
+      jumpToBoardFile(prevPath);
+      showBackButton(window.boardNavStack.length > 0);
+    }
+  }
+};
+backButton.onmouseenter = function() {
+  backButton.style.background = '#e2d9cb';
+  backButton.style.boxShadow = '0 4px 16px rgba(109,92,77,0.10)';
+};
+backButton.onmouseleave = function() {
+  backButton.style.background = '#f3efe7';
+  backButton.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)';
+};

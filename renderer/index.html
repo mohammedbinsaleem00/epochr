@@ -79,6 +79,14 @@
           <div id="task-tags-btns" class="filter-btn-group"></div>
           <input type="text" id="new-tag-input" placeholder="Add new tag and press Enter">
         </div>
+        <div class="modal-field">
+          <label>Linked Board (optional)</label>
+          <input type="text" id="linked-board-path" placeholder="No board linked" readonly style="flex:1;">
+          <div class="linked-board-btn-group">
+            <button type="button" id="select-linked-board-btn" class="modal-btn">Browse</button>
+            <button type="button" id="clear-linked-board-btn" class="modal-btn" style="display:none;">Clear</button>
+          </div>
+        </div>
         <div class="modal-actions">
           <button type="submit" id="save-task-btn" class="modal-btn primary">Save</button>
         </div>
