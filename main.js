@@ -26,10 +26,12 @@ function setContextMenu(win) {
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1000,
-    height: 700,
+    width: 1300,
+    height: 900,
+    minWidth: 1300,
+    minHeight: 900,
     frame: false, // Remove the default title bar
-    icon: path.join(__dirname, 'appIcon.png'), // Set app icon
+    icon: path.join(__dirname, 'favicon.ico'), // Set app icon for packaged app
     title: 'Epochr', // Set window title
     webPreferences: {
       preload: path.join(__dirname, 'renderer', 'renderer.js'),

@@ -4,10 +4,32 @@
   "description": "Native Windows Kanban board based todo list app using Electron.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder --win"
   },
   "dependencies": {},
   "devDependencies": {
-    "electron": "^30.0.0"
+    "electron": "^30.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "icon": "favicon.ico",
+    "appId": "com.epochr.kanban",
+    "productName": "epochr",
+    "files": [
+      "main.js",
+      "renderer/**/*",
+      "models/**/*",
+      "logo.png",
+      "cursor-*.png",
+      "favicon.ico",
+      "package.json"
+    ],
+    "win": {
+      "icon": "favicon.ico",
+      "target": [
+        "nsis"
+      ]
+    }
   }
 }

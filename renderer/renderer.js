@@ -529,6 +529,10 @@ function showContextMenu(x, y) {
   saveBoardItem.textContent = 'Save Board';
   saveBoardItem.setAttribute('data-action', 'save');
   contextMenu.appendChild(saveBoardItem);
+  //Seperator
+  const separator = document.createElement('div');
+  separator.className = 'context-separator';
+  contextMenu.appendChild(separator);
   // Tags
   const manageTagsItem = document.createElement('div');
   manageTagsItem.className = 'context-item';
@@ -541,6 +545,10 @@ function showContextMenu(x, y) {
   filterItem.textContent = 'Filter Tasks';
   filterItem.setAttribute('data-action', 'filter');
   contextMenu.appendChild(filterItem);
+  //Seperator
+  const separator2 = document.createElement('div');
+  separator2.className = 'context-separator';
+  contextMenu.appendChild(separator2);
   // Toggle Status Bar
   const statusBarVisible = getStatusBarVisible();
   const toggleStatusBtn = document.createElement('div');
