@@ -94,4 +94,14 @@
   --cursor-normal: url('../cursor-normal.png') 0 0, auto;
   --cursor-hover: url('../cursor-hover.png') 0 0, pointer;
   --cursor-drag: url('../cursor-drag.png') 0 0, grab;
+
+  /* AI Remark Bar */
+  --ai-remark-color: #dbd1bf;
+  --ai-remark-font-size: 13px;
+  --ai-remark-padding: 0 12px;
+  --ai-remark-bottom: 28px;
+  --ai-remark-z-index: 99998;
+  --ai-remark-text-align: center;
+  --ai-remark-font-family: 'Cascadia Mono', 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+  --ai-remark-letter-spacing: 0.01em;
 }

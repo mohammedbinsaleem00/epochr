@@ -563,6 +563,7 @@ function renderBoard() {
     });
   });
   enableCustomDrag();
+  updateAIRemark();
 }
 
 // Context menu logic
@@ -615,6 +616,13 @@ function showContextMenu(x, y) {
   toggleStatusBtn.textContent = statusBarVisible ? 'Hide Status Bar' : 'Show Status Bar';
   toggleStatusBtn.setAttribute('data-action', 'toggle-status-bar');
   contextMenu.appendChild(toggleStatusBtn);
+  // Toggle AI Remark
+  const aiRemarkVisible = getAIRemarkVisible();
+  const toggleAIRemarkBtn = document.createElement('div');
+  toggleAIRemarkBtn.className = 'context-item';
+  toggleAIRemarkBtn.textContent = aiRemarkVisible ? 'Hide Remark' : 'Show Remark';
+  toggleAIRemarkBtn.setAttribute('data-action', 'toggle-ai-remark');
+  contextMenu.appendChild(toggleAIRemarkBtn);
   contextMenu.style.display = 'block';
   contextMenu.style.left = x + 'px';
   contextMenu.style.top = y + 'px';
@@ -675,6 +683,10 @@ contextMenu.addEventListener('click', function(e) {
       const currentlyVisible = getStatusBarVisible();
       setStatusBarVisible(!currentlyVisible);
       break;
+    case 'toggle-ai-remark':
+      const currentlyVisibleAI = getAIRemarkVisible();
+      setAIRemarkVisible(!currentlyVisibleAI);
+      break;
   }
 });
 
@@ -682,6 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderBoard();
   updateCurrentBoardPath(window.currentFilePath);
   setStatusBarVisible(getStatusBarVisible());
+  setAIRemarkVisible(getAIRemarkVisible());
 });
 
 document.getElementById('min-btn').onclick = () => ipcRenderer.send('window:minimize');
@@ -695,6 +708,14 @@ function setStatusBarVisible(visible) {
 }
 function getStatusBarVisible() {
   return localStorage.getItem('statusBarVisible') !== '0';
+}
+function setAIRemarkVisible(visible) {
+  const el = document.getElementById('ai-remark');
+  if (el) el.style.display = visible ? '' : 'none';
+  localStorage.setItem('aiRemarkVisible', visible ? '1' : '0');
+}
+function getAIRemarkVisible() {
+  return localStorage.getItem('aiRemarkVisible') !== '0';
 }
 
 // --- Linked Board field logic for task modal ---
@@ -859,3 +880,207 @@ document.addEventListener('mousedown', function(e) {
     taskContextMenu.style.display = 'none';
   }
 });
+
+function getWittyRemark(tasks, doing, done) {
+  const remarks = {
+    empty: [
+      "Wow, nothing here. Did you even open the right app?",
+      "This board is emptier than my motivation on a Monday.",
+      "Nothing to see here. Go add some chaos!",
+      "No tasks? No worries. Or maybe worry a little...",
+      "It's so empty, I can hear the echo of your laziness.",
+      "Clean slate? Or just pure avoidance?",
+      "This could be inspiring. Or it's just sad.",
+      "You sure this isn't just your brain on display?",
+      "Zero tasks. Infinite procrastination potential.",
+      "Even tumbleweeds are like, 'Damn, this is deserted.'"
+    ],
+    onlyTasks: [
+      "Tasks are piling up. Maybe do something?",
+      "Look at all those tasks! Procrastination level: expert.",
+      "Your backlog called. It wants attention.",
+      "So many tasks, so little action. Classic.",
+      "Nice hoarding. Ever thought of doing one?",
+      "This is a museum of unfulfilled ambition.",
+      "You plan. You stack. But do you do?",
+      "These tasks won't complete themselves... or will they?",
+      "It's cute how you believe in future-you.",
+      "Mount Procrastination is growing fast."
+    ],
+    onlyDoing: [
+      "All hustle, no backlog. Who are you trying to impress?",
+      "Everything's in progress. Are you a machine?",
+      "No tasks left behind. Just a lot in limbo.",
+      "You like living on the edge, huh?",
+      "Work in progress? More like work in perpetual limbo.",
+      "You’re juggling flaming swords. Bold move.",
+      "Hope you enjoy cliffhangers — none of this is finished.",
+      "You’re doing things... allegedly.",
+      "This is either productivity or a cry for help.",
+      "You put all your eggs in one chaotic basket."
+    ],
+    onlyDone: [
+      "All done? Go outside, touch some grass.",
+      "Nothing left to do. Overachiever alert!",
+      "You finished everything? Show-off.",
+      "Done and dusted. Time for a nap.",
+      "What is this? The productivity Olympics?",
+      "You beat the system... for now.",
+      "Zero to-dos. Time to start questioning existence.",
+      "You might be done, but are you fulfilled?",
+      "Congratulations, you’re currently unemployed.",
+      "This looks suspicious. Are you lying?"
+    ],
+    lotsDone: [
+      "Overachiever alert! Or are you just avoiding new work?",
+      "You could teach a productivity masterclass.",
+      "So much done, but at what cost?",
+      "You must really hate having a backlog.",
+      "You’ve done more today than I’ve done all year.",
+      "The to-do list is scared of you now.",
+      "Burnout speedrun champion, congrats!",
+      "You powered through. Now what, hero?",
+      "Keep going and you’ll unlock ‘Existential Crisis’ mode.",
+      "This energy is suspicious. Are you okay?"
+    ],
+    multitask: [
+      "Multitasking? Or just making a mess?",
+      "You have more in progress than a software update.",
+      "Octopus mode: activated.",
+      "Are you sure you know what you're doing?",
+      "You're everywhere. And also nowhere.",
+      "Jack of all trades, master of ‘eh’.",
+      "Multitasking: because why fail one thing at a time?",
+      "This looks like chaos. Because it is.",
+      "You're spreading thinner than my paycheck.",
+      "You’re doing the most. But are you doing it well?"
+    ],
+    balanced: [
+      "A balanced board. Or maybe you just got bored.",
+      "Some to do, some doing, some done. Adulting 101.",
+      "This board is healthier than my diet.",
+      "Nice balance! Or is it just luck?",
+      "Equilibrium achieved. For now.",
+      "You're riding the productivity seesaw.",
+      "This might actually be functional. Weird.",
+      "Balanced like a caffeinated monk.",
+      "This is what stable chaos looks like.",
+      "Don’t get too comfy. That balance won’t last."
+    ],
+    progress: [
+      "Progress? Or just moving things around?",
+      "Tasks are moving! Or are they?",
+      "At least something's happening.",
+      "Keep it up, or at least pretend to.",
+      "Forward-ish momentum detected.",
+      "You’re faking progress like a pro.",
+      "Productivity cosplay. Nice.",
+      "The illusion of progress is still progress, right?",
+      "Shuffling tasks like it's a card trick.",
+      "You're doing stuff! Maybe! Hopefully?"
+    ],
+    waiting: [
+      "Tasks waiting, but hey, at least you finished something.",
+      "Backlog is jealous of your done pile.",
+      "You finish things, but the list never ends.",
+      "Done pile growing, but so is the backlog.",
+      "One step forward, two tasks added.",
+      "You slay tasks, but the beast keeps growing.",
+      "Like doing dishes — it never ends.",
+      "This is the productivity treadmill.",
+      "Sisyphus called. He gets it.",
+      "You’re doing great, but so is your chaos."
+    ],
+    noNew: [
+      "No new tasks? Are you on vacation or just lazy?",
+      "Momentum is real, but so is burnout.",
+      "No new tasks, just pure momentum!",
+      "You must be waiting for something to break.",
+      "Cruise control mode: engaged.",
+      "Enjoy the calm before the next storm of tasks.",
+      "You’re either efficient or dangerously idle.",
+      "This feels like the eye of the storm.",
+      "Do nothing long enough and it'll feel earned.",
+      "You’re free... for now."
+    ],
+    oneTask: [
+      "One lonely task. Even your to-do list is sad.",
+      "Just one? Don't mess it up.",
+      "One task to rule them all.",
+      "A single task. The chosen one.",
+      "This is either focus or fear of commitment.",
+      "Even this task feels awkward.",
+      "One task. Big responsibility. Good luck.",
+      "You vs. that one task. Place your bets.",
+      "Don’t let this task become a legacy problem.",
+      "If this fails, it’s 100% your fault."
+    ],
+    oneDoing: [
+      "One task in progress. Try not to mess it up.",
+      "Focus mode: ON. Distraction mode: also ON?",
+      "All eggs in one basket. Good luck.",
+      "One thing at a time. Revolutionary.",
+      "You're walking the productivity tightrope.",
+      "Just one? This is either zen or delusion.",
+      "Don’t blink, it might disappear.",
+      "Slow and steady. But like, hurry up.",
+      "This is intense for no reason.",
+      "Don’t let it sit there forever. We see you."
+    ],
+    oneDone: [
+      "One task done. Want a medal or something?",
+      "Small wins matter. Or so they say.",
+      "One done. Celebrate the little things.",
+      "You did it! Now do it again.",
+      "One step at a time. Baby steps... or crawling?",
+      "Progress so small, it needs a magnifying glass.",
+      "Congrats, now back to work.",
+      "Nice! Now double it.",
+      "You’re statistically productive. Barely.",
+      "Don't strain yourself with all that effort."
+    ],
+    default: [
+      "Tasks: " + tasks + ", Doing: " + doing + ", Done: " + done + ". Try harder.",
+      "Is this your best? The board thinks not.",
+      "Keep going, or at least keep pretending.",
+      "You call this productivity?",
+      "Not the worst. But definitely not the best.",
+      "Mediocrity called. It wants its crown back.",
+      "Your board has commitment issues.",
+      "It's a mess, but it's *your* mess.",
+      "Somehow functional. Mostly chaos.",
+      "Keep grinding. Or keep scrolling. Up to you."
+    ]
+  };
+
+  // Pick the state
+  let remarkCategory = 'default';
+  if (tasks === 0 && doing === 0 && done === 0) remarkCategory = 'empty';
+  else if (tasks > 0 && doing === 0 && done === 0) remarkCategory = 'onlyTasks';
+  else if (doing > 0 && tasks === 0 && done === 0) remarkCategory = 'onlyDoing';
+  else if (done > 0 && tasks === 0 && doing === 0) remarkCategory = 'onlyDone';
+  else if (done >= tasks + doing && done > 2) remarkCategory = 'lotsDone';
+  else if (doing > 1) remarkCategory = 'multitask';
+  else if (tasks > 0 && doing > 0 && done > 0) remarkCategory = 'balanced';
+  else if (tasks > 0 && done > 0 && doing === 0) remarkCategory = 'waiting';
+  else if (doing > 0 && done > 0 && tasks === 0) remarkCategory = 'noNew';
+  else if (tasks === 1 && doing === 0 && done === 0) remarkCategory = 'oneTask';
+  else if (doing === 1 && tasks === 0 && done === 0) remarkCategory = 'oneDoing';
+  else if (done === 1 && tasks === 0 && doing === 0) remarkCategory = 'oneDone';
+  else if (doing > 0 || done > 0) remarkCategory = 'progress';
+
+  // Pick a random remark from the chosen category
+  const options = remarks[remarkCategory] || remarks['default'];
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+
+function updateAIRemark() {
+  const tasks = boardData.tasks.filter(t => (t.section || 'tasks') === 'tasks').length;
+  const doing = boardData.tasks.filter(t => t.section === 'doing').length;
+  const done = boardData.tasks.filter(t => t.section === 'done').length;
+  const remark = getWittyRemark(tasks, doing, done);
+  const el = document.getElementById('ai-remark');
+  if (el) el.textContent = remark;
+  setAIRemarkVisible(getAIRemarkVisible());
+}

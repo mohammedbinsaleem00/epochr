@@ -668,3 +668,17 @@ body {
     padding: 6px 4px 4px 4px;
   }
 }
+#ai-remark {
+  position: fixed;
+  bottom: var(--ai-remark-bottom);
+  left: 0;
+  width: 100%;
+  color: var(--ai-remark-color);
+  font-size: var(--ai-remark-font-size);
+  padding: var(--ai-remark-padding);
+  z-index: var(--ai-remark-z-index);
+  text-align: var(--ai-remark-text-align);
+  font-family: var(--ai-remark-font-family);
+  letter-spacing: var(--ai-remark-letter-spacing);
+  background: none;
+}
