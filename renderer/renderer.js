@@ -810,3 +810,52 @@ backButton.onmouseleave = function() {
   backButton.style.background = '#f3efe7';
   backButton.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)';
 };
+
+// --- Task-only context menu for deleting a task ---
+const taskContextMenu = document.createElement('div');
+taskContextMenu.className = 'custom-context-menu';
+taskContextMenu.style.display = 'none';
+taskContextMenu.innerHTML = `\
+  <button class="context-item" data-action="delete-task">Delete Task</button>\
+`;
+document.body.appendChild(taskContextMenu);
+let contextTaskId = null;
+
+document.addEventListener('contextmenu', function(e) {
+  const card = e.target.closest('.task-card');
+  if (card) {
+    e.preventDefault();
+    contextTaskId = card.getAttribute('data-task-id');
+    // Position and show the task context menu
+    taskContextMenu.style.display = 'block';
+    taskContextMenu.style.left = e.clientX + 'px';
+    taskContextMenu.style.top = e.clientY + 'px';
+    // Hide the main context menu if open
+    const mainMenu = document.getElementById('custom-context-menu');
+    if (mainMenu) mainMenu.style.display = 'none';
+    return;
+  }
+  // Show the normal context menu for non-task right-clicks
+  e.preventDefault();
+  showContextMenu(e.clientX, e.clientY);
+});
+
+taskContextMenu.addEventListener('click', function(e) {
+  if (!e.target.classList.contains('context-item')) return;
+  const action = e.target.getAttribute('data-action');
+  taskContextMenu.style.display = 'none';
+  if (action === 'delete-task' && contextTaskId) {
+    const idx = boardData.tasks.findIndex(t => t.id === contextTaskId);
+    if (idx !== -1) {
+      boardData.tasks.splice(idx, 1);
+      renderBoard();
+      autosaveBoard();
+    }
+  }
+});
+
+document.addEventListener('mousedown', function(e) {
+  if (taskContextMenu.style.display === 'block' && !taskContextMenu.contains(e.target)) {
+    taskContextMenu.style.display = 'none';
+  }
+});
