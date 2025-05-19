@@ -41,8 +41,8 @@ ipcRenderer.on('board:new', () => {
 });
 ipcRenderer.on('board:load', (event, data, filePath) => {
   if (filePath) window.currentFilePath = filePath;
+  updateCurrentBoardPath(window.currentFilePath);
   loadBoardFromData(data);
-  // Removed forced UI reload to prevent data loss
 });
 ipcRenderer.on('board:requestSave', () => {
   saveBoard();
@@ -55,7 +55,13 @@ ipcRenderer.on('filter:open', () => {
 });
 ipcRenderer.on('set-current-file', (event, filePath) => {
   window.currentFilePath = filePath;
+  updateCurrentBoardPath(window.currentFilePath);
 });
+
+function updateCurrentBoardPath(path) {
+  const el = document.getElementById('current-board-path');
+  if (el) el.textContent = path || 'None';
+}
 
 function renderTaskTagsButtons(selectedTags = []) {
   const tagContainer = document.getElementById('task-tags-btns');
@@ -504,6 +510,44 @@ function renderBoard() {
 const contextMenu = document.getElementById('custom-context-menu');
 
 function showContextMenu(x, y) {
+  contextMenu.innerHTML = '';
+  // New Board
+  const newBoardItem = document.createElement('div');
+  newBoardItem.className = 'context-item';
+  newBoardItem.textContent = 'New Board';
+  newBoardItem.setAttribute('data-action', 'new');
+  contextMenu.appendChild(newBoardItem);
+  // Load Board
+  const loadBoardItem = document.createElement('div');
+  loadBoardItem.className = 'context-item';
+  loadBoardItem.textContent = 'Load Board';
+  loadBoardItem.setAttribute('data-action', 'load');
+  contextMenu.appendChild(loadBoardItem);
+  // Save Board
+  const saveBoardItem = document.createElement('div');
+  saveBoardItem.className = 'context-item';
+  saveBoardItem.textContent = 'Save Board';
+  saveBoardItem.setAttribute('data-action', 'save');
+  contextMenu.appendChild(saveBoardItem);
+  // Tags
+  const manageTagsItem = document.createElement('div');
+  manageTagsItem.className = 'context-item';
+  manageTagsItem.textContent = 'Manage Tags';
+  manageTagsItem.setAttribute('data-action', 'tags');
+  contextMenu.appendChild(manageTagsItem);
+  // Filter
+  const filterItem = document.createElement('div');
+  filterItem.className = 'context-item';
+  filterItem.textContent = 'Filter Tasks';
+  filterItem.setAttribute('data-action', 'filter');
+  contextMenu.appendChild(filterItem);
+  // Toggle Status Bar
+  const statusBarVisible = getStatusBarVisible();
+  const toggleStatusBtn = document.createElement('div');
+  toggleStatusBtn.className = 'context-item';
+  toggleStatusBtn.textContent = statusBarVisible ? 'Hide Status Bar' : 'Show Status Bar';
+  toggleStatusBtn.setAttribute('data-action', 'toggle-status-bar');
+  contextMenu.appendChild(toggleStatusBtn);
   contextMenu.style.display = 'block';
   contextMenu.style.left = x + 'px';
   contextMenu.style.top = y + 'px';
@@ -529,10 +573,13 @@ contextMenu.addEventListener('click', function(e) {
       // Prompt for file path before creating new board
       ipcRenderer.invoke('dialog:saveBoard', JSON.stringify({ tasks: [], tags: [] }), null).then(filePath => {
         if (filePath) {
+          logToMain('log', '[DEBUG] About to emit board:load for file:', filePath);
           window.currentFilePath = filePath;
-          resetBoard();
-          // Save the empty board to the new file
-          ipcRenderer.invoke('dialog:saveBoard', JSON.stringify(boardData), filePath);
+          ipcRenderer.send('set-current-file', filePath); // keep main process in sync
+          const data = fs.readFileSync(filePath, 'utf-8');
+          ipcRenderer.emit('board:load', null, data, filePath);
+          // Notify main process to save this as last opened file for auto-load
+          ipcRenderer.send('board:loaded', filePath);
         }
       });
       break;
@@ -540,6 +587,8 @@ contextMenu.addEventListener('click', function(e) {
       ipcRenderer.invoke('dialog:openBoard').then(result => {
         if (result && result.data) {
           window.currentFilePath = result.filePath;
+          ipcRenderer.send('set-current-file', result.filePath); // keep main process in sync
+          updateCurrentBoardPath(result.filePath); // update status bar immediately
           loadBoardFromData(result.data);
         }
       });
@@ -555,13 +604,28 @@ contextMenu.addEventListener('click', function(e) {
     case 'filter':
       openFilterModal();
       break;
+    case 'toggle-status-bar':
+      const currentlyVisible = getStatusBarVisible();
+      setStatusBarVisible(!currentlyVisible);
+      break;
   }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
   renderBoard();
+  updateCurrentBoardPath(window.currentFilePath);
+  setStatusBarVisible(getStatusBarVisible());
 });
 
 document.getElementById('min-btn').onclick = () => ipcRenderer.send('window:minimize');
 document.getElementById('max-btn').onclick = () => ipcRenderer.send('window:maximize');
 document.getElementById('close-btn').onclick = () => ipcRenderer.send('window:close');
+
+function setStatusBarVisible(visible) {
+  const bar = document.getElementById('status-bar');
+  if (bar) bar.style.display = visible ? '' : 'none';
+  localStorage.setItem('statusBarVisible', visible ? '1' : '0');
+}
+function getStatusBarVisible() {
+  return localStorage.getItem('statusBarVisible') !== '0';
+}

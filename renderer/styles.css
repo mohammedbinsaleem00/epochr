@@ -538,7 +538,8 @@ body {
 }
 .custom-context-menu .context-item {
   display: block;
-  width: 100%;
+  overflow-x: hidden;
+  width: auto;
   background: none;
   border: none;
   color: var(--font-color);

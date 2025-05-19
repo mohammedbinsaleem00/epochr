@@ -146,3 +146,8 @@ ipcMain.handle('dialog:saveBoard', async (event, boardData, currentFilePath) => 
   fs.writeFileSync(filePath, boardData, 'utf-8');
   return filePath;
 });
+
+ipcMain.on('set-current-file', (event, filePath) => {
+  currentFilePath = filePath;
+  saveLastOpenedFile(filePath); // Always update config for auto-load
+});
