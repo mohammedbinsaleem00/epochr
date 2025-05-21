@@ -1,6 +1,6 @@
 # Epochr
 
-Native Windows board-based todo list app built with Electron.
+Because you deserve a to-do list app that works offline, looks clean, and occasionally bullies you into finishing stuff.
 
 ## Features
 - **Task Management**: Add, edit, delete, and drag-and-drop tasks between sections.
