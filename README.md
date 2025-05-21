@@ -46,10 +46,7 @@ Native Windows Kanban board-based todo list app built with Electron.
 - Drag tasks between columns.
 - Use the status bar to see the current board file.
 - Link tasks to other boards for advanced workflows.
-
-## File Format
-- Boards are saved as `.epchr` files (JSON format).
-- Each board contains tasks and tags.
+- Boards are saved as locally `.epchr` files (JSON format).
 
 
 ---
