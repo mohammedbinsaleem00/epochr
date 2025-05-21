@@ -1,6 +1,6 @@
 # Epochr
 
-Because you deserve a to-do list app that works offline, looks clean, and occasionally bullies you into finishing stuff.
+Epochr is a native Windows to-do list app with a clean, board-based interface for organizing tasks. It supports tags, priorities, and multi-board linking, all stored locally in portable .epchr files—no cloud, no accounts. Designed for speed, privacy, and simplicity, Epochr helps you stay organized with a minimal UI and smart, contextual feedback.
 
 ## Features
 - **Task Management**: Add, edit, delete, and drag-and-drop tasks between sections.
