@@ -1,6 +1,6 @@
 # Epochr
 
-Native Windows Kanban board-based todo list app built with Electron.
+Native Windows board-based todo list app built with Electron.
 
 ## Features
 - **Task Management**: Add, edit, delete, and drag-and-drop tasks between sections.
