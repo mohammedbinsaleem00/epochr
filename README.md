@@ -21,7 +21,7 @@ Native Windows Kanban board-based todo list app built with Electron.
 ### Steps
 1. **Clone the repository:**
    ```sh
-   git clone <your-repo-url> epochr-build
+   git clone https://github.com/mohammedbinsaleem00/epochr.git
    cd epochr-build
    ```
 2. **Install dependencies:**
@@ -51,8 +51,6 @@ Native Windows Kanban board-based todo list app built with Electron.
 - Boards are saved as `.epchr` files (JSON format).
 - Each board contains tasks and tags.
 
-## License
-MIT
 
 ---
 
