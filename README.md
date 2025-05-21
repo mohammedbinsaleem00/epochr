@@ -3,14 +3,12 @@
 Native Windows Kanban board-based todo list app built with Electron.
 
 ## Features
-- **Kanban Board**: Organize tasks into Tasks, Doing, and Done columns.
 - **Task Management**: Add, edit, delete, and drag-and-drop tasks between sections.
 - **Tags**: Create and assign colored tags to tasks for easy filtering and organization.
 - **Priority Levels**: Set task priority (Normal, Low, High) with color-coded pills.
 - **Board Files**: Save and load boards as `.epchr` files for easy sharing and backup.
 - **Linked Boards**: Link tasks to other board files for multi-board navigation.
-- **Context Menus**: Right-click for quick board and task actions.
-- **Witty AI Remark Bar**: Motivational (and sarcastic) remarks based on your board's state.
+- **Remark Bar**: Motivational (and sarcastic) remarks based on your board's state.
 - **Minimal UI**: Clean, distraction-free interface with custom theming.
 - **No Cloud, No Account**: All data is local, private, and portable.
 
