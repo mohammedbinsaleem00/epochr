@@ -646,15 +646,24 @@ contextMenu.addEventListener('click', function(e) {
   switch (action) {
     case 'new':
       // Prompt for file path before creating new board
-      ipcRenderer.invoke('dialog:saveBoard', JSON.stringify({ tasks: [], tags: [] }), null).then(filePath => {
+      const demoBoard = {
+        tasks: [
+          {
+            id: 'demo-' + Date.now(),
+            title: 'Welcome to Epochr!',
+            desc: 'This is your first task. Edit or delete me.',
+            priority: 'normal',
+            tags: [],
+            section: 'tasks'
+          }
+        ],
+        tags: []
+      };
+      ipcRenderer.invoke('dialog:saveBoard', JSON.stringify(demoBoard), null).then(filePath => {
         if (filePath) {
-          logToMain('log', '[DEBUG] About to emit board:load for file:', filePath);
           window.currentFilePath = filePath;
           ipcRenderer.send('set-current-file', filePath); // keep main process in sync
-          const data = fs.readFileSync(filePath, 'utf-8');
-          ipcRenderer.emit('board:load', null, data, filePath);
-          // Notify main process to save this as last opened file for auto-load
-          ipcRenderer.send('board:loaded', filePath);
+          ipcRenderer.send('request:autoopen', filePath); // ask main process to load the new board
         }
       });
       break;
